@@ -24,20 +24,12 @@ jobs:
           docker rm test-app
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-and-test
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.5
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          port: 22
-          script: |
-            cd ~/devops-lab-service
-            git pull
-            docker compose -f docker/docker-compose.yml up -d --build
+      - name: Deploy with Docker Compose
+        run: |
+          docker compose -f docker/docker-compose.yml up -d --build
