@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t devops-lab-service -f docker/Dockerfile .
+
+      - name: Run container
+        run: |
+          docker run -d -p 8000:8000 --name test-app devops-lab-service
+          sleep 5
+          curl --fail http://localhost:8000/ || exit 1
+          docker stop test-app
+          docker rm test-app
